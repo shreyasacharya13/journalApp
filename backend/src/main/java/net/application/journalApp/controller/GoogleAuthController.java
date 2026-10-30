@@ -45,14 +45,14 @@ import java.util.*;
 @Slf4j
 public class GoogleAuthController {
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id:}")
+    @Value("${GOOGLE_CLIENT_ID:}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.client.registration.google.client-secret:}")
+    @Value("${GOOGLE_CLIENT_SECRET:}")
     private String clientSecret;
-    @Value("${google.redirect-uri}")
+    @Value("${GOOGLE_REDIRECT_URI:http://localhost:8080/auth/google/callback}")
     private String redirectUri;
-    @Value("${google.frontend-uri:http://localhost:5173}")
+    @Value("${FRONTEND_URL:http://localhost:5173}")
     private String frontendUri;
 
     @Autowired
