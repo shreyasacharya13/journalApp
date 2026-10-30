@@ -1,0 +1,83 @@
+package net.application.journalApp.utils;
+import net.application.journalApp.api.*;
+import net.application.journalApp.cache.*;
+import net.application.journalApp.config.*;
+import net.application.journalApp.constants.*;
+import net.application.journalApp.dto.*;
+import net.application.journalApp.entity.*;
+import net.application.journalApp.enums.*;
+import net.application.journalApp.filter.*;
+import net.application.journalApp.model.*;
+import net.application.journalApp.repository.*;
+import net.application.journalApp.scheduler.*;
+import net.application.journalApp.service.*;
+import net.application.journalApp.utils.*;
+
+
+import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class JwtUtil {
+
+    @Value("${jwt.secret}")
+    private String secret;
+    @Value("${jwt.expiration:86400000}")
+    private long expirationMs;
+
+    private SecretKey getSigningKey() {
+        if (secret == null || secret.length() < 32) throw new IllegalStateException("JWT_SECRET must contain at least 32 characters");
+        return Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    public String extractUsername(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.getSubject();
+    }
+
+    public Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    public String generateToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, username);
+    }
+
+    private String createToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .claims(claims)
+                .subject(subject)
+                .header().empty().add("typ","JWT")
+                .and()
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public Boolean validateToken(String token) {
+        return !isTokenExpired(token);
+    }
+
+
+}
