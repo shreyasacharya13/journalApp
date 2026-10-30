@@ -15,6 +15,8 @@ import net.application.journalApp.utils.*;
 
 
 import lombok.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import net.application.journalApp.enums.Sentiment;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -28,6 +30,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class JournalEntry {
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
     @NonNull
     private String title;
