@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD
+  ? 'https://journalapp-toyh.onrender.com'
+  : '')).replace(/\/+$/, '')
 const TOKEN_KEY = 'daybook.jwt'
 const USER_KEY = 'daybook.username'
 
